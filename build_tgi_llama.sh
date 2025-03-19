@@ -15,14 +15,15 @@ unset TMPDIR
 image="docker://ghcr.io/huggingface/text-generation-inference:latest" && \
 image_name="tgi" && \
 sandbox_name="${image_name}_sandbox" && \
-volume="$PWD/data" && \
-model="meta-llama/Llama-3.2-1B"
+volume="$PWD/data"
+
+export MODEL="meta-llama/Llama-3.2-1B"
 
 mkdir -p "$volume"
 
 apptainer build --sandbox "$sandbox_name" "$image"
 apptainer exec --writable --fakeroot "$sandbox_name" mkdir -p /data
-apptainer shell --writable --fakeroot --nv --bind $volume:/data "$sandbox_name"
+apptainer shell --writable --fakeroot --nv --bind $volume:/data --env MODEL=$MODEL "$sandbox_name"
 # Apptainer> ...
 apt-get update
 apt-get install -y python3-pip
@@ -31,7 +32,7 @@ pip3 --version
 pip3 install huggingface_hub hf_transfer
 
 huggingface-cli login
-huggingface-cli download "$model" --local-dir "/data/$model" --local-dir-use-symlinks False
+huggingface-cli download "$MODEL" --local-dir "/data/$MODEL" --local-dir-use-symlinks False
 
 exit
 
@@ -40,7 +41,7 @@ apptainer build "$image_name".sif "$sandbox_name"
 
 # move image and copy model to home directory
 mv "$image_name".sif ~ && \
-cp -r "$volume/$model" ~ && \
+cp -r "$volume/$MODEL" ~ && \
 cd ~
 
 # delete build directory

@@ -12,16 +12,20 @@ export APPTAINER_TMPDIR=/scratch/apptainer/${USER}/tmp
 unset TMPDIR
 
 # build apptainer sandbox
-apptainer build --sandbox ubuntu_20.04_sandbox docker://ubuntu:20.04
-apptainer shell --writable --fakeroot ubuntu_20.04_sandbox
+image="docker://ubuntu:20.04"
+image_name="ubuntu_20.04"
+sandbox_name="${image_name}_sandbox"
+
+apptainer build --sandbox "$sandbox_name" "$image"
+apptainer shell --writable --fakeroot "$sandbox_name"
 # Apptainer> ...
 exit
 
 # convert apptainer sandbox to image
-apptainer build ubuntu_20.04.sif ubuntu_20.04_sandbox
+apptainer build "$image_name".sif "$sandbox_name"
 
 # move image to home directory
-mv ubuntu_20.04.sif ~
+mv "$image_name".sif ~
 cd ~
 
 # delete build directory

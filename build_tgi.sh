@@ -1,14 +1,20 @@
 # start interactive job on gpu node
-qsub -I -q login-gpu
+qsub -I -q login-gpu -l select=1:ncpus=8:mem=32gb -l walltime=00:30:00
 
 # create build directory
-cd /scratch/apptainer && mkdir ${USER} && cd ${USER} && mkdir tmp
+cd /scratch/apptainer && \
+mkdir ${USER} && \
+cd ${USER} && \
+mkdir tmp
 
 # update TMPDIR env variables
-export APPTAINER_TMPDIR=/scratch/apptainer/${USER}/tmp && unset TMPDIR
+export APPTAINER_TMPDIR=/scratch/apptainer/${USER}/tmp && \
+unset TMPDIR
 
 # build apptainer sandbox
-image="docker://ubuntu:20.04" && image_name="ubuntu_20.04" && sandbox_name="${image_name}_sandbox"
+image="docker://ghcr.io/huggingface/text-generation-inference:latest" && \
+image_name="tgi" && \
+sandbox_name="${image_name}_sandbox"
 
 apptainer build --sandbox "$sandbox_name" "$image"
 apptainer shell --writable --fakeroot "$sandbox_name"

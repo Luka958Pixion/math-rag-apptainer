@@ -11,7 +11,7 @@ cd "${PBS_O_WORKDIR:-""}"
 
 export PYTHONUNBUFFERED=1
 
-apptainer exec --nv -B $PWD/data/meta-llama/Llama-3.2-3B:/model tgi.sif \
+apptainer exec --nv --bind $PWD/data/meta-llama/Llama-3.2-3B:/model tgi.sif \
 text-generation-launcher --model-id /model --port 8000 --hostname 0.0.0.0 &
 
 

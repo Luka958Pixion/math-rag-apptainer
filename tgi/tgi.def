@@ -1,0 +1,17 @@
+Bootstrap: docker
+From: ghcr.io/huggingface/text-generation-inference:latest
+
+%environment
+    export PYTHONUNBUFFERED=1
+    export TGI_PORT=8000
+    export TGI_HOSTNAME=0.0.0.0
+
+%runscript
+    exec text-generation-launcher --model-id /model --port $TGI_PORT --hostname $TGI_HOSTNAME
+
+%labels
+    Author luka.panic@pixion.co
+    Version v0.0.1
+
+%help
+    A server for Text Generation Inference (TGI) from Hugging Face.

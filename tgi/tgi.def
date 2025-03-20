@@ -14,4 +14,11 @@ From: ghcr.io/huggingface/text-generation-inference:latest
     Version v0.0.1
 
 %help
-    A server for Text Generation Inference (TGI) from Hugging Face.
+    Description:
+        A server for Text Generation Inference (TGI) from Hugging Face.
+
+    Build:
+        apptainer build tgi.sif tgi.def
+
+    Usage:
+        apptainer run --nv --bind $PWD/data/meta-llama/Llama-3.2-3B:/model tgi.sif

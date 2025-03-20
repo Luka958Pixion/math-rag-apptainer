@@ -19,4 +19,11 @@ From: python:3.11
     Version v0.0.1
 
 %help
-    A client for Hugging Face Hub.
+    Description:
+        A client for Hugging Face Hub.
+
+    Build:
+        apptainer build hf_cli.sif hf_cli.def
+
+    Usage:
+        apptainer run --nv --bind $PWD/data:/data --env MODEL="$MODEL" hf_cli.sif

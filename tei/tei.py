@@ -1,4 +1,3 @@
-import os
 from text_embeddings import Client
 
 def main():

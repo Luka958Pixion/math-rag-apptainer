@@ -1,4 +1,3 @@
-import os
 from text_generation import Client
 
 

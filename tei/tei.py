@@ -1,10 +1,19 @@
-from text_embeddings import Client
+import httpx
+
+
+def embed_texts(base_url, input_texts):
+    response = httpx.post(
+        f"{base_url}/embed",
+        json={"inputs": input_texts}
+    )
+    response.raise_for_status()
+    return response.json()
 
 def main():
-    client = Client("http://0.0.0.0:8080")
+    base_url = "http://0.0.0.0:8080"
     input_texts = ["Tell me a joke."]
-    response = client.embed(input_texts)
-    print("Embedding vector:", response.embeddings[0])
+    embeddings = embed_texts(base_url, input_texts)
+    print("Embedding vector:", embeddings[0])
 
 if __name__ == "__main__":
     main()

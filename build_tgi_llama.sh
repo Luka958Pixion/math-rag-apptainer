@@ -40,9 +40,10 @@ exit
 apptainer build "$image_name".sif "$sandbox_name"
 
 # move image and copy model to home directory
-mv "$image_name".sif ~ && \
-cp -r "$volume/$MODEL" ~ && \
-cd ~
+home_dir="new" && \
+mv "$image_name".sif ~/${home_dir} && \
+cp -r "$volume/$MODEL" ~/${home_dir} && \
+cd ~/${home_dir}
 
 # delete build directory
 rm -rf /scratch/apptainer/${USER}

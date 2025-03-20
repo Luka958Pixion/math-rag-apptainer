@@ -1,0 +1,24 @@
+Bootstrap: docker
+From: ghcr.io/huggingface/text-embeddings-inference:latest
+
+%environment
+    export PYTHONUNBUFFERED=1
+    export TEI_PORT=8080
+    export TEI_HOSTNAME=0.0.0.0
+
+%runscript
+    exec text-embeddings-router --model-id /model --port $TEI_PORT --hostname $TEI_HOSTNAME
+
+%labels
+    Author luka.panic@pixion.co
+    Version v0.0.1
+
+%help
+    Description:
+        A server for Text Embeddings Inference (TGI) from Hugging Face.
+
+    Build:
+        apptainer build tei.sif tei.def
+
+    Usage:
+        apptainer run --nv --bind $PWD/data/BAAI/bge-large-en-v1.5:/model tei.sif

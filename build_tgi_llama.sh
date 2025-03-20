@@ -28,8 +28,8 @@ apptainer shell --writable --fakeroot --nv --bind $volume:/data --env MODEL=$MOD
 apt-get update
 apt-get install -y python3-pip
 
-pip3 --version
-pip3 install huggingface_hub hf_transfer
+pip --version
+pip install huggingface_hub hf_transfer
 
 huggingface-cli login
 huggingface-cli download "$MODEL" --local-dir "/data/$MODEL" --local-dir-use-symlinks False

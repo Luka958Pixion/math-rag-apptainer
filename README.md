@@ -1,4 +1,7 @@
-# ubuntu-apptainer
+# apptainer
+
+## Setup
+- `python3 setup.py`
 
 ## Docker
 1. `docker build --no-cache --platform=linux/amd64 -t ubuntu-apptainer .`

@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "apptainer"
+version = "0.1.0"
+description = ""
+authors = ["Luka958Pixion <luka.panic@pixion.co>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.12"
+fastapi = "^0.115.8"
+python-decouple = "^3.8"
+uvicorn = "^0.34.0"
+python-multipart = "^0.0.20"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.9.7"
+pre-commit = "^4.1.0"
+
+[tool.ruff]
+line-length = 88
+include = ["**/pyproject.toml", "**.py"]
+exclude = [".git", ".vscode", ".idea", "build", "dist"]
+
+[tool.ruff.lint]
+fixable = ["ALL"]
+unfixable = []
+select = ["I"]
+
+[tool.ruff.lint.isort]
+lines-after-imports = 2
+lines-between-types = 1
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

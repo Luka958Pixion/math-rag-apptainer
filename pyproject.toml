@@ -6,7 +6,7 @@ authors = ["Luka958Pixion <luka.panic@pixion.co>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.12"
+python = ">=3.12,<4.0"
 fastapi = "^0.115.8"
 python-decouple = "^3.8"
 uvicorn = "^0.34.0"
@@ -15,6 +15,10 @@ python-multipart = "^0.0.20"
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.9.7"
 pre-commit = "^4.1.0"
+
+
+[tool.poetry.group.tgi.dependencies]
+text-generation = "^0.7.0"
 
 [tool.ruff]
 line-length = 88

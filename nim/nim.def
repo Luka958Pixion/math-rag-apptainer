@@ -1,0 +1,27 @@
+Bootstrap: docker
+From: nvcr.io/nim/meta/{{ MODEL_NAME }}:1.6.0
+
+%arguments
+    MODEL_NAME=llama-3.2-3b-instruct
+
+%environment
+    export PYTHONUNBUFFERED=1
+
+%labels
+    Author luka.panic@pixion.co
+    Version v0.0.1
+
+%help
+    Description:
+        A server for NVIDIA NIM.
+
+    Build:
+        apptainer build {{ MODEL_NAME }}.sif {{ MODEL_NAME }}.def
+
+    Usage:
+        apptainer run \
+            --nv \
+            --fakeroot \
+            --overlay {{ MODEL_NAME }}-overlay.img  \
+            --env NGC_API_KEY=$NGC_API_KEY \
+            {{ MODEL_NAME }}.sif &

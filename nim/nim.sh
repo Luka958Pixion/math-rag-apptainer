@@ -24,7 +24,7 @@ mkdir -p "$LOCAL_NIM_CACHE"
 apptainer run \
     --nv \
     --fakeroot \
-    --overlay llama-3.2-3b-instruct.img  \
+    --overlay llama-3.2-3b-instruct-overlay.img  \
     --env NGC_API_KEY=$NGC_API_KEY \
     llama-3.2-3b-instruct.sif &
 

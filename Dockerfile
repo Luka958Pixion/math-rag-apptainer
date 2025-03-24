@@ -1,21 +1,22 @@
 # Stage 1: Build stage
-FROM ubuntu:20.04 AS builder
+FROM --platform=linux/amd64 ubuntu:20.04 AS builder
 
 # Environment variables
-ENV DEBIAN_FRONTEND=noninteractive \
-    LANG=en_US.UTF-8 \
-    LC_ALL=en_US.UTF-8 \
-    LANGUAGE=en_US:en \
-    GOVERSION=1.21.0 \
-    PYTHON_VERSION=3.12.7 \
-    POETRY_VERSION=1.8.3 \
-    POETRY_HOME="/opt/poetry" \
-    POETRY_VIRTUALENVS_IN_PROJECT=true \
-    POETRY_NO_INTERACTION=1 \
-    PATH="$POETRY_HOME/bin:$PATH"
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV GOVERSION=1.21.0
+ENV POETRY_VERSION=2.1.1
+ENV POETRY_HOME=/opt/poetry
+ENV VIRTUAL_ENV=/root/.venv
+ENV POETRY_VIRTUALENVS_IN_PROJECT=true
+ENV PATH=/usr/local/go/bin:${POETRY_HOME}/bin:${VIRTUAL_ENV}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV TZ=Europe/Zagreb
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+# Install system dependencies and set timezone non-interactively
+RUN apt-get update && \
+    apt-get install -y \
     wget \
     build-essential \
     libseccomp-dev \
@@ -25,13 +26,18 @@ RUN apt-get update && apt-get install -y \
     uidmap \
     git \
     locales \
+    tzdata \
     ca-certificates \
     gcc \
     g++ \
     nano \
     qemu-user-static \
     curl \
-    && rm -rf /var/lib/apt/lists/*
+    software-properties-common && \
+    ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone && \
+    dpkg-reconfigure --frontend noninteractive tzdata && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set up locale
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
@@ -43,16 +49,18 @@ RUN wget https://go.dev/dl/go${GOVERSION}.linux-amd64.tar.gz && \
     tar -C /usr/local -xzf go${GOVERSION}.linux-amd64.tar.gz && \
     rm go${GOVERSION}.linux-amd64.tar.gz
 
-# Install Python 3.12.7
-RUN apt-get update && apt-get install -y \
-    software-properties-common && \
+# Install Python 3.12 (with venv support)
+RUN add-apt-repository universe && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
-    apt-get install -y python${PYTHON_VERSION} python${PYTHON_VERSION}-venv python${PYTHON_VERSION}-dev && \
+    apt-get install -y python3.12 python3.12-venv python3.12-dev && \
     rm -rf /var/lib/apt/lists/*
 
+# Create a symlink for 'python' so that Poetry can find it
+RUN ln -s /usr/bin/python3.12 /usr/local/bin/python
+
 # Install Poetry
-RUN curl -sSL https://install.python-poetry.org | python3 -
+RUN curl -sSL https://install.python-poetry.org | python3.12 -
 
 # Install Apptainer
 RUN wget https://github.com/apptainer/apptainer/releases/download/v1.3.6/apptainer-1.3.6.tar.gz && \
@@ -65,66 +73,58 @@ RUN wget https://github.com/apptainer/apptainer/releases/download/v1.3.6/apptain
 
 # Verify installations
 RUN go version && \
-    python${PYTHON_VERSION} --version && \
+    python3.12 --version && \
     poetry --version && \
     apptainer --version
 
 # Set working directory
 WORKDIR /root
 
-# Copy project files
+# Copy Poetry dependency files first for caching
 COPY pyproject.toml poetry.lock ./
 
-# Install project dependencies
-RUN poetry install --no-root --no-dev
+# Install project dependencies (main only, no dev)
+RUN poetry install --no-root --only main
 
-# Copy the rest of the application code
+# Copy the rest of the application code (includes the .venv directory)
 COPY . .
 
 # Stage 2: Runtime stage
-FROM ubuntu:20.04 AS runtime
+FROM --platform=linux/amd64 ubuntu:20.04 AS runtime
 
-# Environment variables
-ENV LANG=en_US.UTF-8 \
-    LC_ALL=en_US.UTF-8 \
-    LANGUAGE=en_US:en \
-    PYTHON_VERSION=3.12.7 \
-    POETRY_HOME="/opt/poetry" \
-    PATH="$POETRY_HOME/bin:$PATH" \
-    VIRTUAL_ENV="/root/.venv" \
-    PATH="$VIRTUAL_ENV/bin:$PATH"
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV POETRY_HOME=/opt/poetry
+ENV VIRTUAL_ENV=/root/.venv
+ENV PATH=${POETRY_HOME}/bin:${VIRTUAL_ENV}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV TZ=Europe/Zagreb
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+# Install runtime dependencies and configure timezone
+RUN apt-get update && \
+    apt-get install -y \
     locales \
     ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+    software-properties-common \
+    tzdata \
+    python3.12 && \
+    ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone && \
+    dpkg-reconfigure --frontend noninteractive tzdata && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set up locale
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen en_US.UTF-8 && \
     update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 
-# Install Python 3.12.7
-RUN apt-get update && apt-get install -y \
-    software-properties-common && \
-    add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get update && \
-    apt-get install -y python${PYTHON_VERSION} python${PYTHON_VERSION}-venv && \
-    rm -rf /var/lib/apt/lists/*
-
-# Install Poetry
-RUN curl -sSL https://install.python-poetry.org | python3 -
-
-# Copy virtual environment from builder stage
-COPY --from=builder /root/.venv /root/.venv
-
-# Copy application code
+# Copy application code and virtual environment from builder
 COPY --from=builder /root /root
 
 # Set working directory
 WORKDIR /root
 
-# Command to run the application
-CMD ["python", "-m", "apptainer_api.main"]
-
+# Command to run the app
+CMD ["python3.12", "-m", "apptainer_api.main"]

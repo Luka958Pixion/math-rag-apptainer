@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "apptainer"
+name = "apptainer-api"
 version = "0.1.0"
 description = ""
 authors = ["Luka958Pixion <luka.panic@pixion.co>"]

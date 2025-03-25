@@ -7,7 +7,7 @@ services:
       target: dev
     container_name: math_rag_apptainer_dev_container
     volumes:
-      - ..:/workspaces:cached
+      - ../:/workspaces:cached
       - venv_volume:/workspaces/.venv
     command: sleep infinity
 

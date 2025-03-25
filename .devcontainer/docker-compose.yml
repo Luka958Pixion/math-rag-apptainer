@@ -1,10 +1,11 @@
 services:
-  app:
+  math-rag-apptainer-service:
+    platform: linux/amd64
     build:
       context: ..
       dockerfile: ./Dockerfile
       target: dev
-    container_name: apptainer_dev_container
+    container_name: math_rag_apptainer_dev_container
     volumes:
       - ..:/workspaces:cached
       - venv_volume:/workspaces/.venv

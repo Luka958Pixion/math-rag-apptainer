@@ -1,5 +1,5 @@
 # ---------- Base Stage  ----------
-FROM --platform=linux/amd64 ubuntu:20.04 AS base
+FROM ubuntu:20.04 AS base
 
 # Environment variables
 ENV DEBIAN_FRONTEND=noninteractive

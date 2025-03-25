@@ -1,7 +1,7 @@
 {
   "name": "math-rag-apptainer-dev-container",
   "dockerComposeFile": "docker-compose.yml",
-  "service": "app",
+  "service": "math-rag-apptainer-service",
   "workspaceFolder": "/workspaces",
   "customizations": {
     "vscode": {

@@ -6,8 +6,8 @@ services:
       target: dev
     container_name: apptainer_dev_container
     volumes:
-      - ..:/workspaces/hpc:cached
-      - venv_volume:/workspaces/hpc/.venv
+      - ..:/workspaces:cached
+      - venv_volume:/workspaces/.venv
     command: sleep infinity
 
 volumes:

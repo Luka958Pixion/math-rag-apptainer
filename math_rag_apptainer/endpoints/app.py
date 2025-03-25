@@ -8,7 +8,7 @@ from fastapi.responses import (
     StreamingResponse,
 )
 
-from apptainer_api.utils import stream_sif_file
+from math_rag_apptainer.utils import stream_sif_file
 
 
 app = FastAPI()

@@ -71,7 +71,7 @@ RUN wget https://github.com/apptainer/apptainer/releases/download/v1.3.6/apptain
     cd .. && rm -rf apptainer-1.3.6*
 
 # Set common working directory
-WORKDIR /workspaces/hpc
+WORKDIR /workspaces
 
 # Copy only Poetry config files (so that production can cache dependency installation)
 COPY pyproject.toml poetry.lock ./

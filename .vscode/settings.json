@@ -1,9 +1,8 @@
 {
-    "python.defaultInterpreterPath": "/workspaces/hpc/.venv/bin/python",
-    "python.analysis.extraPaths": [
-      "/workspaces/hpc",
-      "/workspaces/hpc/.venv/lib/python3.12/site-packages"
-    ],
-    "python.languageServer": "Pylance"
-  }
-  
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}",
+    "${workspaceFolder}/.venv/lib/python3.12/site-packages"
+  ],
+  "python.languageServer": "Pylance"
+}

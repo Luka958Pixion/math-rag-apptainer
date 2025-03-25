@@ -1,16 +1,17 @@
 {
-  "name": "Apptainer Dev Container",
+  "name": "math-rag-apptainer-dev-container",
   "dockerComposeFile": "docker-compose.yml",
   "service": "app",
-  "workspaceFolder": "/workspaces/hpc",
+  "workspaceFolder": "/workspaces",
   "customizations": {
     "vscode": {
       "settings": {
-        "python.defaultInterpreterPath": "/workspaces/hpc/.venv/bin/python"
+        "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python"
       },
       "extensions": [
         "ms-python.python",
-        "ms-azuretools.vscode-docker"
+        "ms-azuretools.vscode-docker",
+        "tamasfe.even-better-toml"
       ]
     }
   },

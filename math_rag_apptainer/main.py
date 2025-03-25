@@ -1,6 +1,6 @@
 import uvicorn
 
-from apptainer_api.endpoints import app
+from math_rag_apptainer.endpoints import app
 
 
 if __name__ == '__main__':

@@ -9,6 +9,8 @@ services:
     volumes:
       - ../:/workspaces:cached
       - venv_volume:/workspaces/.venv
+    ports:
+      - 5000:5000
     command: sleep infinity
 
 volumes:

@@ -7,6 +7,7 @@ from fastapi.responses import (
     Response,
     StreamingResponse,
 )
+from scalar_fastapi import get_scalar_api_reference
 
 from math_rag_apptainer.utils import stream_sif_file
 
@@ -78,3 +79,11 @@ async def health_check() -> JSONResponse:
         return JSONResponse(
             content={'status': 'error', 'detail': str(e)}, status_code=500
         )
+
+
+@app.get('/scalar', include_in_schema=False)
+async def scalar_html():
+    return get_scalar_api_reference(
+        openapi_url=app.openapi_url,
+        title=app.title,
+    )

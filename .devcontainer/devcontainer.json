@@ -16,5 +16,6 @@
     }
   },
   "postCreateCommand": "poetry install --no-root --with dev && poetry run pre-commit install",
-  "remoteUser": "root"
+  "remoteUser": "root",
+  "forwardPorts": [5000]
 }

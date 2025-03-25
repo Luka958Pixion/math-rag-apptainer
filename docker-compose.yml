@@ -3,15 +3,16 @@ services:
     platform: linux/amd64
     build:
       context: ..
-      dockerfile: ./Dockerfile
+      dockerfile: Dockerfile
       target: dev
     container_name: math_rag_apptainer_dev_container
     volumes:
-      - ../:/workspaces:cached
+      - ./:/workspaces:cached
       - venv_volume:/workspaces/.venv
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./.env:/workspaces/.env:ro
     ports:
-      - 7010:7010
+      - ${PORT}:${PORT}
     command: sleep infinity
 
 volumes:

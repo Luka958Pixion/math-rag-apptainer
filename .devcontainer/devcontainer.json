@@ -1,6 +1,6 @@
 {
   "name": "math-rag-apptainer-dev-container",
-  "dockerComposeFile": "docker-compose.yml",
+  "dockerComposeFile": "../docker-compose.yml",
   "service": "math-rag-apptainer-service",
   "workspaceFolder": "/workspaces",
   "customizations": {
@@ -11,11 +11,12 @@
       "extensions": [
         "ms-python.python",
         "ms-azuretools.vscode-docker",
-        "tamasfe.even-better-toml"
+        "tamasfe.even-better-toml",
+          "uctakeoff.vscode-counter"
       ]
     }
   },
   "postCreateCommand": "poetry install --no-root --with dev && poetry run pre-commit install",
   "remoteUser": "root",
-  "forwardPorts": [7010]
+  "forwardPorts": ["${localEnv:PORT}"]
 }

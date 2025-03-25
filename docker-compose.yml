@@ -2,7 +2,7 @@ services:
   math-rag-apptainer-service:
     platform: linux/amd64
     build:
-      context: ..
+      context: .
       dockerfile: Dockerfile
       target: dev
     container_name: math_rag_apptainer_dev_container

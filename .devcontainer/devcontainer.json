@@ -1,21 +1,19 @@
 {
   "name": "Apptainer Dev Container",
-  "build": {
-    "dockerfile": "../Dockerfile",
-    "context": "..",
-    "target": "builder"
-  },
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/hpc",
   "customizations": {
     "vscode": {
       "settings": {
-        "python.pythonPath": "/usr/local/bin/python"
+        "python.defaultInterpreterPath": "/workspaces/hpc/.venv/bin/python"
       },
       "extensions": [
-          "ms-python.python",
-          "ms-azuretools.vscode-docker"
+        "ms-python.python",
+        "ms-azuretools.vscode-docker"
       ]
     }
   },
-  "postCreateCommand": "poetry install --no-root && poetry run pre-commit install",
+  "postCreateCommand": "poetry install --no-root --with dev && poetry run pre-commit install",
   "remoteUser": "root"
 }

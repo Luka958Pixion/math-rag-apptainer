@@ -1,0 +1,14 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: ./Dockerfile
+      target: dev
+    container_name: apptainer_dev_container
+    volumes:
+      - ..:/workspaces/hpc:cached
+      - venv_volume:/workspaces/hpc/.venv
+    command: sleep infinity
+
+volumes:
+  venv_volume:

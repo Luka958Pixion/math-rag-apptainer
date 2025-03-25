@@ -87,7 +87,7 @@ RUN poetry install --no-root --only main
 COPY . .
 
 # Set production startup command
-CMD ["poetry", "run", "python", "-m", "apptainer_api.main"]
+CMD ["poetry", "run", "python", "-m", "math_rag_apptainer.main"]
 
 
 # ---------- Development Stage ----------

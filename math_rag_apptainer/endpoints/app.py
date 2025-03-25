@@ -14,7 +14,7 @@ from math_rag_apptainer.utils import stream_sif_file
 
 app = FastAPI()
 client = from_env()
-container: Container = client.containers.get('apptainer')
+container: Container = client.containers.get('math_rag_apptainer_dev_container')
 
 
 @app.get('/build/tgi')

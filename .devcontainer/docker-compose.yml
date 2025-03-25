@@ -9,6 +9,7 @@ services:
     volumes:
       - ../:/workspaces:cached
       - venv_volume:/workspaces/.venv
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - 7010:7010
     command: sleep infinity

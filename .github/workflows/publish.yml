@@ -43,5 +43,5 @@ jobs:
           context: .
           platforms: linux/amd64
           push: true
-          tags: ghcr.io/${{ steps.lowercase.outputs.owner_lc }}/apptainer_api:latest
+          tags: ghcr.io/${{ steps.lowercase.outputs.owner_lc }}/math_rag_apptainer:latest
 

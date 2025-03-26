@@ -7,10 +7,12 @@
   "python.languageServer": "Pylance",
   "files.exclude": {
     "**/.venv": true,
-    "**/.ruff_cache": true
+    "**/.ruff_cache": true,
+    "**/.VSCodeCounter": true
   },
   "search.exclude": {
     "**/.venv": true,
-    "**/.ruff_cache": true
+    "**/.ruff_cache": true,
+    "**/.VSCodeCounter": true
   }
 }

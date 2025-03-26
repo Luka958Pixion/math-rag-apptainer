@@ -2,7 +2,6 @@ from docker import from_env
 from docker.models.containers import Container
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import (
-    JSONResponse,
     PlainTextResponse,
     Response,
     StreamingResponse,
@@ -64,21 +63,8 @@ async def get_version() -> Response:
 
 
 @app.get('/health')
-async def health_check() -> JSONResponse:
-    try:
-        container.reload()
-
-        if container.status == 'running':
-            return JSONResponse(content={'status': 'ok'})
-
-        return JSONResponse(
-            content={'status': 'container not running'}, status_code=503
-        )
-
-    except Exception as e:
-        return JSONResponse(
-            content={'status': 'error', 'detail': str(e)}, status_code=500
-        )
+async def health_check() -> dict[str, str]:
+    return {'status': 'ok'}
 
 
 @app.get('/scalar', include_in_schema=False)

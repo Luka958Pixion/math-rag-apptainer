@@ -12,11 +12,11 @@
           "ms-python.python",
           "ms-azuretools.vscode-docker",
           "tamasfe.even-better-toml",
-            "uctakeoff.vscode-counter"
+          "uctakeoff.vscode-counter"
         ]
       }
     },
-    "postCreateCommand": "poetry install --no-root --with dev && poetry run pre-commit install",
+    "postCreateCommand": "sh ./.devcontainer/post-create.sh",
     "remoteUser": "root",
     "forwardPorts": ["${localEnv:PORT}"]
   }

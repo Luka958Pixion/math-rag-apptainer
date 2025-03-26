@@ -1,9 +1,8 @@
 import shutil
+import subprocess
 
 from pathlib import Path
 
-from docker import from_env
-from docker.models.containers import Container
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import (
     FileResponse,
@@ -14,8 +13,6 @@ from scalar_fastapi import get_scalar_api_reference
 
 
 app = FastAPI()
-client = from_env()
-container: Container = client.containers.get('math_rag_apptainer_dev_container')
 
 UPLOAD_DIR = Path('uploads')
 PROCESSED_DIR = Path('processed')
@@ -33,23 +30,17 @@ async def build(file: UploadFile = File(...)) -> FileResponse:
     with def_path.open('wb') as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    with def_path.open('rb') as def_file:
-        container.put_archive('/tmp', def_file.read())
-
-    exit_code, output = container.exec_run(
-        f'apptainer build /tmp/{sif_filename} /tmp/{file.filename}'
-    )
-
-    if exit_code != 0:
-        raise HTTPException(
-            status_code=500, detail=f'Apptainer build failed: {output.decode()}'
+    try:
+        subprocess.run(
+            ['apptainer', 'build', str(sif_path), str(def_path)],
+            check=True,
+            capture_output=True,
+            text=True,
         )
-
-    bits, stat = container.get_archive(f'/tmp/{sif_filename}')
-
-    with sif_path.open('wb') as sif_file:
-        for chunk in bits:
-            sif_file.write(chunk)
+    except subprocess.CalledProcessError as e:
+        raise HTTPException(
+            status_code=500, detail=f'Apptainer build failed: {e.stderr}'
+        )
 
     return FileResponse(
         sif_path, media_type='application/octet-stream', filename=sif_filename
@@ -62,17 +53,18 @@ async def build_tei() -> None:
 
 
 @app.get('/apptainer/version')
-async def get_version() -> Response:
-    result = container.exec_run('apptainer version')
-    output = result.output
+async def version() -> str:
+    try:
+        result = subprocess.run(
+            ['apptainer', 'version'], check=True, capture_output=True, text=True
+        )
 
-    if isinstance(output, bytes):
-        output = output.decode()
+        return result.stdout
 
-    if result.exit_code != 0:
-        raise HTTPException(status_code=500, detail=output)
-
-    return PlainTextResponse(content=output)
+    except subprocess.CalledProcessError as e:
+        raise HTTPException(
+            status_code=500, detail=f'Apptainer version failed: {e.stderr}'
+        )
 
 
 @app.get('/health')

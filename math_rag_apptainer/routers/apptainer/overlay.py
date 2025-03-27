@@ -46,7 +46,7 @@ def overlay_create_background_task(
 
 
 def overlay_create_cleanup_task(task_id: str) -> None:
-    img_path = IMG_DIR / f'{task_id}.def'
+    img_path = IMG_DIR / f'{task_id}.img'
 
     if img_path.exists():
         img_path.unlink()
@@ -82,7 +82,7 @@ async def build_status(request: OverlayCreateStatusRequest) -> dict[str, str]:
     if status is None:
         raise HTTPException(status_code=404, detail=f'Task {task_id} not found')
 
-    return {'task_id': task_id, 'status': str(status)}
+    return {'task_id': task_id, 'status': status.value}
 
 
 @router.post('/apptainer/overlay/create/result')
@@ -105,5 +105,5 @@ async def overlay_create_result(request: OverlayCreateResultRequest) -> FileResp
         img_path,
         media_type='application/octet-stream',
         filename=f'{task_id}.img',
-        background_task=background_task,
+        background=background_task,
     )

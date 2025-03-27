@@ -85,7 +85,7 @@ async def build_status(request: BuildStatusRequest) -> dict[str, str]:
     if status is None:
         raise HTTPException(status_code=404, detail=f'Task {task_id} not found')
 
-    return {'task_id': task_id, 'status': str(status)}
+    return {'task_id': task_id, 'status': status.value}
 
 
 @router.post('/apptainer/build/result')
@@ -108,5 +108,5 @@ async def build_result(request: BuildResultRequest) -> FileResponse:
         sif_path,
         media_type='application/octet-stream',
         filename=f'{task_id}.sif',
-        background_task=background_task,
+        background=background_task,
     )

@@ -45,12 +45,7 @@ async def build(file: UploadFile = File(...)) -> FileResponse:
     args = ['apptainer', 'build', str(sif_path), str(def_path)]
 
     try:
-        subprocess.run(
-            args,
-            check=True,
-            capture_output=True,
-            text=True,
-        )
+        subprocess.run(args, check=True, capture_output=True, text=True)
 
     except subprocess.CalledProcessError as e:
         raise HTTPException(
@@ -77,12 +72,7 @@ async def overlay_create(request: OverlayCreateRequest) -> FileResponse:
     args.extend(['--size', str(request.size), img_path])
 
     try:
-        subprocess.run(
-            args,
-            check=True,
-            capture_output=True,
-            text=True,
-        )
+        subprocess.run(args, check=True, capture_output=True, text=True)
 
     except subprocess.CalledProcessError as e:
         raise HTTPException(

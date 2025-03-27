@@ -9,11 +9,13 @@ from fastapi import BackgroundTasks, FastAPI, File, HTTPException, UploadFile, s
 from fastapi.responses import FileResponse
 from scalar_fastapi import get_scalar_api_reference
 
+from math_rag_apptainer.enums import BuildStatus
 from math_rag_apptainer.requests import (
     BuildClearRequest,
     BuildResultRequest,
     OverlayCreateRequest,
 )
+from math_rag_apptainer.trackers import BuildStatusTracker
 
 
 app = FastAPI()
@@ -26,15 +28,20 @@ DEF_DIR.mkdir(parents=True, exist_ok=True)
 SIF_DIR.mkdir(parents=True, exist_ok=True)
 IMG_DIR.mkdir(parents=True, exist_ok=True)
 
+build_status_tracker = BuildStatusTracker()
+
 
 def build_background_task(task_id: str, def_path: Path, sif_path: Path) -> None:
+    build_status_tracker.set_status(task_id, BuildStatus.RUNNING)
     args = ['apptainer', 'build', str(sif_path), str(def_path)]
 
     try:
         subprocess.run(args, check=True, capture_output=True, text=True)
+        build_status_tracker.set_status(task_id, BuildStatus.DONE)
 
     except subprocess.CalledProcessError as e:
         logging.error(f'Apptainer build {task_id} failed: {e.stderr}')
+        build_status_tracker.set_status(task_id, BuildStatus.FAILED)
 
 
 def overlay_create_background_task(
@@ -65,6 +72,7 @@ async def build(
         )
 
     task_id = str(uuid4())
+    build_status_tracker.set_status(task_id, BuildStatus.PENDING)
     def_path = DEF_DIR / f'{task_id}.def'
     sif_path = SIF_DIR / f'{task_id}.sif'
 
@@ -78,26 +86,37 @@ async def build(
 
 @app.post('/apptainer/build/result')
 async def build_result(request: BuildResultRequest) -> FileResponse:
-    sif_path = SIF_DIR / f'{request.task_id}.sif'
+    task_id = request.task_id
+    sif_path = SIF_DIR / f'{task_id}.sif'
+    build_status = build_status_tracker.get_status(task_id)
 
-    if not sif_path.exists():
+    if build_status == BuildStatus.FAILED:
+        raise HTTPException(status_code=500, detail='Build failed')
+
+    elif (
+        build_status in (BuildStatus.PENDING, BuildStatus.RUNNING)
+        or not sif_path.exists()
+    ):
         raise HTTPException(status_code=404, detail='Result is not available yet')
 
     return FileResponse(
         sif_path,
         media_type='application/octet-stream',
-        filename=f'{request.task_id}.sif',
+        filename=f'{task_id}.sif',
     )
 
 
 @app.post('/apptainer/build/clear')
 async def build_clear(request: BuildClearRequest) -> None:
-    def_path = DEF_DIR / f'{request.task_id}.def'
-    sif_path = SIF_DIR / f'{request.task_id}.sif'
+    task_id = request.task_id
+    def_path = DEF_DIR / f'{task_id}.def'
+    sif_path = SIF_DIR / f'{task_id}.sif'
 
     for path in (def_path, sif_path):
         if path.exists():
             path.unlink()
+
+    build_status_tracker.remove_status(task_id)
 
 
 @app.post('/apptainer/overlay/create')

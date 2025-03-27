@@ -43,6 +43,10 @@ def build_background_task(task_id: str, def_path: Path, sif_path: Path) -> None:
         logging.error(f'Apptainer build {task_id} failed: {e.stderr}')
         build_status_tracker.set_status(task_id, BuildStatus.FAILED)
 
+        if def_path.exists():
+            def_path.unlink()
+            logging.info(f'Deleted .def file for task {task_id} after build failure')
+
 
 def overlay_create_background_task(
     task_id: str, fakeroot: bool, size: int, img_path: Path
@@ -84,25 +88,34 @@ async def build(
     return {'task_id': task_id}
 
 
+@app.post('/apptainer/build/status')
+async def build_status(request: BuildResultRequest) -> dict[str, str]:
+    task_id = request.task_id
+    build_status = build_status_tracker.get_status(task_id)
+
+    if build_status is None:
+        raise HTTPException(status_code=404, detail=f'Task {task_id} not found')
+
+    return {'task_id': task_id, 'status': str(build_status)}
+
+
 @app.post('/apptainer/build/result')
 async def build_result(request: BuildResultRequest) -> FileResponse:
     task_id = request.task_id
     sif_path = SIF_DIR / f'{task_id}.sif'
     build_status = build_status_tracker.get_status(task_id)
 
-    if build_status == BuildStatus.FAILED:
-        raise HTTPException(status_code=500, detail='Build failed')
+    if build_status is None:
+        raise HTTPException(status_code=404, detail=f'Task {task_id} not found')
 
-    elif (
-        build_status in (BuildStatus.PENDING, BuildStatus.RUNNING)
-        or not sif_path.exists()
-    ):
-        raise HTTPException(status_code=404, detail='Result is not available yet')
+    if build_status != BuildStatus.DONE or not sif_path.exists():
+        raise HTTPException(
+            status_code=400,
+            detail=f'Result not available, build status: {build_status}',
+        )
 
     return FileResponse(
-        sif_path,
-        media_type='application/octet-stream',
-        filename=f'{task_id}.sif',
+        sif_path, media_type='application/octet-stream', filename=f'{task_id}.sif'
     )
 
 

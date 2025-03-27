@@ -171,6 +171,7 @@ cython_debug/
 .pypirc
 
 # custom
+.VSCodeCounter
 .ruff_cache
 .env
 .tmp

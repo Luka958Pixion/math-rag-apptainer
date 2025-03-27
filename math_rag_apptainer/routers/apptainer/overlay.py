@@ -75,14 +75,14 @@ async def overlay_create(
 
 
 @router.post('/apptainer/overlay/create/status')
-async def build_status(request: OverlayCreateStatusRequest) -> dict[str, str]:
+async def overlay_create_status(request: OverlayCreateStatusRequest) -> dict[str, str]:
     task_id = request.task_id
     status = status_tracker.get_status(task_id)
 
     if status is None:
         raise HTTPException(status_code=404, detail=f'Task {task_id} not found')
 
-    return {'task_id': task_id, 'status': status.value}
+    return {'status': status.value}
 
 
 @router.post('/apptainer/overlay/create/result')

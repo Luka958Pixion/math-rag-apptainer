@@ -85,7 +85,7 @@ async def build_status(request: BuildStatusRequest) -> dict[str, str]:
     if status is None:
         raise HTTPException(status_code=404, detail=f'Task {task_id} not found')
 
-    return {'task_id': task_id, 'status': status.value}
+    return {'status': status.value}
 
 
 @router.post('/apptainer/build/result')

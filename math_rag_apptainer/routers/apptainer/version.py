@@ -12,8 +12,9 @@ async def version() -> str:
 
     try:
         result = subprocess.run(args, check=True, capture_output=True, text=True)
+        version = result.stdout.strip()
 
-        return result.stdout
+        return version
 
     except subprocess.CalledProcessError as e:
         raise HTTPException(

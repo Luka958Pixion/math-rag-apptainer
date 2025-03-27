@@ -76,7 +76,7 @@ async def build(
     return {'task_id': task_id}
 
 
-@app.get('/apptainer/build/result')
+@app.post('/apptainer/build/result')
 async def build_result(request: BuildResultRequest) -> FileResponse:
     sif_path = SIF_DIR / f'{request.task_id}.sif'
 
@@ -108,16 +108,20 @@ async def overlay_create(
         path.unlink()
 
     task_id = str(uuid4())
-    img_path = IMG_DIR / f'{img_path}.img'
+    img_path = IMG_DIR / f'{task_id}.img'
 
     background_tasks.add_task(
-        build_background_task, task_id, request.fakeroot, request.size, img_path
+        overlay_create_background_task,
+        task_id,
+        request.fakeroot,
+        request.size,
+        img_path,
     )
 
     return {'task_id': task_id}
 
 
-@app.get('/apptainer/overlay/create/result')
+@app.post('/apptainer/overlay/create/result')
 async def overlay_create_result(request: BuildResultRequest) -> FileResponse:
     img_path = IMG_DIR / f'{request.task_id}.img'
 

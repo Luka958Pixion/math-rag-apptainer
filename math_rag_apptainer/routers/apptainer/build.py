@@ -15,14 +15,14 @@ from math_rag_apptainer.trackers import BuildStatusTracker
 
 
 router = APIRouter()
+status_tracker = BuildStatusTracker()
+
 
 DEF_DIR = Path('files/defs')
 SIF_DIR = Path('files/sifs')
 
 DEF_DIR.mkdir(parents=True, exist_ok=True)
 SIF_DIR.mkdir(parents=True, exist_ok=True)
-
-status_tracker = BuildStatusTracker()
 
 
 def build_background_task(task_id: str, def_path: Path, sif_path: Path) -> None:

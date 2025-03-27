@@ -18,12 +18,11 @@ from math_rag_apptainer.trackers import OverlayCreateStatusTracker
 
 
 router = APIRouter()
+status_tracker = OverlayCreateStatusTracker()
 
 IMG_DIR = Path('files/imgs')
 
 IMG_DIR.mkdir(parents=True, exist_ok=True)
-
-status_tracker = OverlayCreateStatusTracker()
 
 
 def overlay_create_background_task(

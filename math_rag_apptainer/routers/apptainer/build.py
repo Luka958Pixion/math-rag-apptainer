@@ -36,7 +36,8 @@ def build_background_task(task_id: str, def_path: Path, sif_path: Path) -> None:
     cmd = f'cd {def_path.parent} && apptainer build {sif_relative_path} {def_relative_path}'
 
     try:
-        subprocess.run(cmd, check=True, shell=True, capture_output=True, text=True)
+        # capture_output=False to see stdout and stderr in console
+        subprocess.run(cmd, check=True, shell=True, capture_output=False, text=True)
         status_tracker.set_status(task_id, BuildStatus.DONE)
 
     except subprocess.CalledProcessError as e:

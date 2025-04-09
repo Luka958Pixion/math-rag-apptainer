@@ -39,7 +39,8 @@ def overlay_create_background_task(
     args.extend(['--size', str(size), img_path])
 
     try:
-        subprocess.run(args, check=True, capture_output=True, text=True)
+        # capture_output=False to see stdout and stderr in console
+        subprocess.run(args, check=True, capture_output=False, text=True)
         status_tracker.set_status(task_id, OverlayCreateStatus.DONE)
 
     except subprocess.CalledProcessError as e:

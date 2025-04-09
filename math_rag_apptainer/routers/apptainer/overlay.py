@@ -1,6 +1,6 @@
-import logging
 import subprocess
 
+from logging import getLogger
 from pathlib import Path
 from uuid import uuid4
 
@@ -16,6 +16,8 @@ from math_rag_apptainer.requests import (
 )
 from math_rag_apptainer.trackers import OverlayCreateStatusTracker
 
+
+logger = getLogger(__name__)
 
 router = APIRouter()
 status_tracker = OverlayCreateStatusTracker()
@@ -41,7 +43,7 @@ def overlay_create_background_task(
         status_tracker.set_status(task_id, OverlayCreateStatus.DONE)
 
     except subprocess.CalledProcessError as e:
-        logging.error(f'Apptainer overlay create {task_id} failed: {e.stderr}')
+        logger.error(f'Apptainer overlay create {task_id} failed: {e.stderr}')
         status_tracker.set_status(task_id, OverlayCreateStatus.FAILED)
 
 
@@ -52,11 +54,11 @@ def overlay_create_cleanup_task(task_id: str) -> None:
         img_path.unlink()
 
     status_tracker.remove_status(task_id)
-    logging.info(f'Cleaned up overlay create files for task {task_id}')
+    logger.info(f'Cleaned up overlay create files for task {task_id}')
 
 
-@router.post('/apptainer/overlay/create')
-async def overlay_create(
+@router.post('/apptainer/overlay/create/init')
+async def overlay_create_init(
     background_tasks: BackgroundTasks, request: OverlayCreateRequest
 ) -> dict[str, str]:
     task_id = str(uuid4())

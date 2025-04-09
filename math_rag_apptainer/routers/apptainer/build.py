@@ -1,7 +1,7 @@
-import logging
 import shutil
 import subprocess
 
+from logging import getLogger
 from pathlib import Path
 from uuid import uuid4
 
@@ -12,6 +12,9 @@ from starlette.background import BackgroundTask
 from math_rag_apptainer.enums import BuildStatus
 from math_rag_apptainer.requests import BuildResultRequest, BuildStatusRequest
 from math_rag_apptainer.trackers import BuildStatusTracker
+
+
+logger = getLogger(__name__)
 
 
 router = APIRouter()
@@ -34,12 +37,12 @@ def build_background_task(task_id: str, def_path: Path, sif_path: Path) -> None:
         status_tracker.set_status(task_id, BuildStatus.DONE)
 
     except subprocess.CalledProcessError as e:
-        logging.error(f'Apptainer build {task_id} failed: {e.stderr}')
+        logger.error(f'Apptainer build {task_id} failed: {e.stderr}')
         status_tracker.set_status(task_id, BuildStatus.FAILED)
 
         if def_path.exists():
             def_path.unlink()
-            logging.info(f'Deleted .def file for task {task_id} after build failure')
+            logger.info(f'Deleted .def file for task {task_id} after build failure')
 
 
 def build_cleanup_task(task_id: str) -> None:
@@ -51,12 +54,14 @@ def build_cleanup_task(task_id: str) -> None:
             path.unlink()
 
     status_tracker.remove_status(task_id)
-    logging.info(f'Cleaned up build files for task {task_id}')
+    logger.info(f'Cleaned up build files for task {task_id}')
 
 
-@router.post('/apptainer/build')
-async def build(
-    background_tasks: BackgroundTasks, def_file: UploadFile = File(...)
+@router.post('/apptainer/build/init')
+async def build_init(
+    background_tasks: BackgroundTasks,
+    def_file: UploadFile = File(...),
+    additional_files: list[UploadFile] = None,
 ) -> dict[str, str]:
     if not def_file.filename.endswith('.def'):
         raise HTTPException(
@@ -71,6 +76,18 @@ async def build(
 
     with def_path.open('wb') as buffer:
         shutil.copyfileobj(def_file.file, buffer)
+
+    if additional_files:
+        for additional_file in additional_files:
+            # writing to DEF_DIR because so apptainer can see it during build
+            if additional_file.filename is None:
+                logger.error('Additional file missing filename')
+                raise ValueError()
+
+            additional_path = DEF_DIR / additional_file.filename
+
+            with additional_path.open('wb') as buffer:
+                shutil.copyfileobj(additional_file.file, buffer)
 
     background_tasks.add_task(build_background_task, task_id, def_path, sif_path)
 

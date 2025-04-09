@@ -1,4 +1,4 @@
-import logging
+from logging import INFO, basicConfig
 
 import uvicorn
 
@@ -17,9 +17,7 @@ from math_rag_apptainer.routers.apptainer import (
 PORT = config('PORT', cast=int)
 
 if __name__ == '__main__':
-    logging.basicConfig(
-        level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s'
-    )
+    basicConfig(level=INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
     app = FastAPI(openapi_url=OPENAPI_URL, title=TITLE)
     app.include_router(health_router)

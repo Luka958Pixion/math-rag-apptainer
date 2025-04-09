@@ -30,10 +30,13 @@ SIF_DIR.mkdir(parents=True, exist_ok=True)
 
 def build_background_task(task_id: str, def_path: Path, sif_path: Path) -> None:
     status_tracker.set_status(task_id, BuildStatus.RUNNING)
-    args = ['apptainer', 'build', str(sif_path), str(def_path)]
+
+    def_relative_path = def_path.name
+    sif_relative_path = Path('../sifs') / sif_path.name
+    cmd = f'cd {def_path.parent} && apptainer build {sif_relative_path} {def_relative_path}'
 
     try:
-        subprocess.run(args, check=True, capture_output=True, text=True)
+        subprocess.run(cmd, check=True, shell=True, capture_output=True, text=True)
         status_tracker.set_status(task_id, BuildStatus.DONE)
 
     except subprocess.CalledProcessError as e:
@@ -61,7 +64,7 @@ def build_cleanup_task(task_id: str) -> None:
 async def build_init(
     background_tasks: BackgroundTasks,
     def_file: UploadFile = File(...),
-    additional_files: list[UploadFile] = None,
+    requirements_file: UploadFile | None = File(None),
 ) -> dict[str, str]:
     if not def_file.filename.endswith('.def'):
         raise HTTPException(
@@ -77,17 +80,16 @@ async def build_init(
     with def_path.open('wb') as buffer:
         shutil.copyfileobj(def_file.file, buffer)
 
-    if additional_files:
-        for additional_file in additional_files:
-            # writing to DEF_DIR because so apptainer can see it during build
-            if additional_file.filename is None:
-                logger.error('Additional file missing filename')
-                raise ValueError()
+    if requirements_file:
+        requirements_path = DEF_DIR / requirements_file.filename
 
-            additional_path = DEF_DIR / additional_file.filename
+        # writing to DEF_DIR because so apptainer can see it during build
+        if requirements_file.filename is None:
+            logger.error('Additional file missing filename')
+            raise ValueError()
 
-            with additional_path.open('wb') as buffer:
-                shutil.copyfileobj(additional_file.file, buffer)
+        with requirements_path.open('wb') as buffer:
+            shutil.copyfileobj(requirements_file.file, buffer)
 
     background_tasks.add_task(build_background_task, task_id, def_path, sif_path)
 

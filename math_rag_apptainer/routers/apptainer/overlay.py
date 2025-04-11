@@ -41,7 +41,7 @@ def overlay_create_background_task(
     try:
         # capture_output=False to see stdout and stderr in console
         subprocess.run(args, check=True, capture_output=False, text=True)
-        status_tracker.set_status(task_id, OverlayCreateStatus.DONE)
+        status_tracker.set_status(task_id, OverlayCreateStatus.FINISHED)
 
     except subprocess.CalledProcessError as e:
         logger.error(f'Apptainer overlay create {task_id} failed: {e.stderr}')
@@ -97,7 +97,7 @@ async def overlay_create_result(request: OverlayCreateResultRequest) -> FileResp
     if status is None:
         raise HTTPException(status_code=404, detail=f'Task {task_id} not found')
 
-    if status != OverlayCreateStatus.DONE or not img_path.exists():
+    if status != OverlayCreateStatus.FINISHED or not img_path.exists():
         raise HTTPException(
             status_code=400, detail=f'Result not available, build status: {status}'
         )

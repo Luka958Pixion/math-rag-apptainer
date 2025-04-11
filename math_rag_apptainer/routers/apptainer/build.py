@@ -38,7 +38,7 @@ def build_background_task(task_id: str, def_path: Path, sif_path: Path) -> None:
     try:
         # capture_output=False to see stdout and stderr in console
         subprocess.run(cmd, check=True, shell=True, capture_output=False, text=True)
-        status_tracker.set_status(task_id, BuildStatus.DONE)
+        status_tracker.set_status(task_id, BuildStatus.FINISHED)
 
     except subprocess.CalledProcessError as e:
         logger.error(f'Apptainer build {task_id} failed: {e.stderr}')
@@ -117,7 +117,7 @@ async def build_result(request: BuildResultRequest) -> FileResponse:
     if status is None:
         raise HTTPException(status_code=404, detail=f'Task {task_id} not found')
 
-    if status != BuildStatus.DONE or not sif_path.exists():
+    if status != BuildStatus.FINISHED or not sif_path.exists():
         raise HTTPException(
             status_code=400, detail=f'Result not available, build status: {status}'
         )

@@ -65,7 +65,7 @@ def build_cleanup_task(task_id: str) -> None:
 async def build_init(
     background_tasks: BackgroundTasks,
     def_file: UploadFile = File(...),
-    requirements_file: UploadFile | None = File(None),
+    additional_file: UploadFile | None = File(None),
 ) -> dict[str, str]:
     if not def_file.filename.endswith('.def'):
         raise HTTPException(
@@ -81,16 +81,16 @@ async def build_init(
     with def_path.open('wb') as buffer:
         shutil.copyfileobj(def_file.file, buffer)
 
-    if requirements_file:
-        requirements_path = DEF_DIR / requirements_file.filename
+    if additional_file:
+        additional_file_path = DEF_DIR / additional_file.filename
 
         # writing to DEF_DIR because so apptainer can see it during build
-        if requirements_file.filename is None:
+        if additional_file.filename is None:
             logger.error('Additional file missing filename')
             raise ValueError()
 
-        with requirements_path.open('wb') as buffer:
-            shutil.copyfileobj(requirements_file.file, buffer)
+        with additional_file_path.open('wb') as buffer:
+            shutil.copyfileobj(additional_file.file, buffer)
 
     background_tasks.add_task(build_background_task, task_id, def_path, sif_path)
 
